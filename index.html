@@ -69,8 +69,8 @@
   .float{position:absolute;text-align:left;box-shadow:0 20px 60px rgba(0,0,0,.55);animation:bob 6s ease-in-out infinite}
   @keyframes bob{50%{transform:translateY(-10px)}}
   .app-wrap{right:-2%;top:2%;width:min(430px,60%)}
-  /* sol sütun: etkinlik geri sayımları */
-  .evs{position:absolute;left:0;top:6%;width:250px;height:360px;z-index:2;pointer-events:none}
+  /* sol sütun: özellik kartları (rastgele belirir) */
+  .evs{position:absolute;left:0;top:6%;width:270px;height:360px;z-index:2;pointer-events:none}
   /* dış kutu yalnızca girip çıkar (opaklık/kayma); sallanma iç kutuda sürekli çalışır, böylece çıkışta takılma olmaz */
   .ev{position:absolute;opacity:0;transform:translateX(-22px) scale(.96);will-change:opacity,transform;
     transition:opacity .55s cubic-bezier(.2,.8,.2,1),transform .55s cubic-bezier(.2,.8,.2,1)}
@@ -78,9 +78,10 @@
   .ev-in{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:12.5px;line-height:1.25;text-align:left;
     border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);border-radius:12px;box-shadow:0 12px 34px rgba(0,0,0,.5);
     animation:bob 6s ease-in-out infinite;animation-delay:var(--bd,0s);transition:border-color .3s,box-shadow .3s}
-  .ev .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#5fd29a;box-shadow:0 0 10px #5fd29a}
-  .ev b{display:block;font-weight:600;white-space:nowrap}
-  .ev small{color:var(--dim);display:block;font-size:11px;font-variant-numeric:tabular-nums}
+  .ev .ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,138,61,.14);color:var(--ember)}
+  .ev .ic svg{width:17px;height:17px}
+  .ev b{display:block;font-weight:600;white-space:nowrap;font-size:13px}
+  .ev small{color:var(--dim);display:block;font-size:11px;line-height:1.3;margin-top:1px}
   .ev.soon .ev-in{border-color:rgba(255,138,61,.55);box-shadow:0 0 22px rgba(255,138,61,.25),0 12px 34px rgba(0,0,0,.5)}
   .ev.soon .dot{background:var(--ember);box-shadow:0 0 12px var(--ember);animation:pulse 1s ease-in-out infinite}
   @keyframes pulse{50%{opacity:.35;transform:scale(.8)}}
@@ -385,73 +386,49 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
 
 })();
 
-/* ---------- etkinlik geri sayımları (uygulamadaki takvimle aynı: Avrupa sunucu saati, shugo.gg/timers) ---------- */
+/* ---------- özellik kartları: solda rastgele belirip kaybolur (en fazla 3 tane aynı anda) ---------- */
 (() => {
-  const range = (a, b, s) => { const o = []; for(let h = a; h <= b; h += s) o.push(h); return o; };
-  const EV = [
-    {n: "Spacetime Rift", times: range(2, 23, 3).map(h => [h, 0])},
-    {n: "Dimensional Invasion", times: range(0, 23, 1).map(h => [h, 30])},
-    {n: "Shugo Festival", times: range(0, 23, 1).map(h => [h, 0])},
-    {n: "Watcher Kaira", times: range(1, 22, 3).map(h => [h, 0])},
-    {n: "Artifact Siege", days: [1, 4, 6], times: [[21, 0]]},
-    {n: "Siege Bosses", days: [1, 4, 6], times: [[21, 30]]},
-    {n: "Guardian Lord Nahma", days: [5, 0], times: [[21, 0]]},
+  const ico = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + p + "</svg>";
+  const FEATS = [
+    {t: "Karakteri kaydet", d: "Ekipman, beceri ve Daevanion görsel olarak masaüstüne", i: ico('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5M9.5 12.8L12 15.3l2.5-2.5"/>')},
+    {t: "Parça ayrıntısı", d: "Üzerine gel: özellikler, taşlar, teotaş", i: ico('<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M12 8v8M9.5 11h5"/>')},
+    {t: "Daevanion tahtaları", d: "Tahtanın tamamı tek bakışta", i: ico('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>')},
+    {t: "Beceriler ve seviyeleri", d: "Aktif, pasif ve özel; simgeleriyle", i: ico('<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>')},
+    {t: "Savaş geçmişi", d: "Biten her savaş kayıtta, oyuncuya tıkla", i: ico('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 8v5l3 2"/>')},
+    {t: "Oyuncu ayrıntısı", d: "Beceri dökümü, kritik, vuruş dağılımı", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
+    {t: "Çok Fazla Öldü", d: "3 kez ölenin yanında uyarı çıkar", i: ico('<circle cx="12" cy="11" r="7"/><path d="M9 20v-3M15 20v-3M9.5 11h.01M14.5 11h.01"/>')},
+    {t: "Kendini günceller", d: "Bar dolar, sihirbazsız kurulur", i: ico('<path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/>')},
+    {t: "Zamanlayıcılar", d: "Boss ve etkinlikler için ön uyarı", i: ico('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/>')},
+    {t: "Sınıf renkli barlar", d: "Yüksekten alçağa solan sıralama", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
+    {t: "Oyunla birlikte açılır", d: "AION 2 açılınca belirir, kapanınca gizlenir", i: ico('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>')},
   ];
-  const fmt = new Intl.DateTimeFormat("en-US", {timeZone: "Europe/Berlin", hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"});
-  const parts = ms => { const o = {}; for(const p of fmt.formatToParts(ms)) o[p.type] = p.value; return o; };
-  function berlin(y, m, d, hh, mm){
-    const wall = Date.UTC(y, m - 1, d, hh, mm); let e = wall;
-    for(let i = 0; i < 2; i++){ const p = parts(e); e -= Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second) - wall; }
-    return e;
-  }
-  function next(ev, from){
-    const t0 = parts(from);
-    for(let add = 0; add < 9; add++){
-      const day = new Date(Date.UTC(+t0.year, +t0.month - 1, +t0.day + add));
-      if(ev.days && !ev.days.includes(day.getUTCDay())) continue;
-      for(const [hh, mm] of ev.times){ const at = berlin(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), hh, mm); if(at >= from) return at; }
-    }
-    return null;
-  }
   const box = document.getElementById("evs");
-  const hms = s => { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60, p = n => String(n).padStart(2, "0"); return h ? `${h}:${p(m)}:${p(ss)}` : `${p(m)}:${p(ss)}`; };
-  const active = new Map(); // etkinlik no -> {el, slot}
+  const active = new Map(); // özellik no -> {el, slot}
   const MAX = 3;
   // Sabit "yuva" konumları; her yeni kart boş bir yuvaya, küçük rastgele kaymayla gelir.
   function slots(){
     const W = box.clientWidth;
     if(innerWidth <= 760){ const w = Math.floor(W / 2) - 4; return [[0, 0], [w + 8, 0], [0, 58], [w + 8, 58]].map(([x, y]) => ({x, y, w})); }
-    return [0, 1, 2, 3, 4].map(i => ({x: 0, y: i * 68 + 4, w: 210}));
+    return [0, 1, 2, 3, 4].map(i => ({x: 0, y: i * 68 + 4, w: 236}));
   }
-  const upd = () => {
-    const now = Date.now();
-    active.forEach(({el, i}) => {
-      const at = next(EV[i], now); if(!at) return;
-      const s = Math.max(0, Math.round((at - now) / 1000));
-      el.querySelector("small").textContent = s < 2 ? "Şimdi!" : "Başlamasına " + hms(s);
-      el.classList.toggle("soon", s < 300);
-    });
-  };
   function spawn(){
     if(active.size >= MAX || document.hidden) return;
-    const free = EV.map((_, i) => i).filter(i => !active.has(i));
+    const free = FEATS.map((_, i) => i).filter(i => !active.has(i));
     const sl = slots(), used = new Set([...active.values()].map(a => a.slot));
     const freeSlots = sl.map((_, k) => k).filter(k => !used.has(k));
     if(!free.length || !freeSlots.length) return;
-    const i = free[Math.floor(Math.random() * free.length)], k = freeSlots[Math.floor(Math.random() * freeSlots.length)], p = sl[k];
+    const i = free[Math.floor(Math.random() * free.length)], k = freeSlots[Math.floor(Math.random() * freeSlots.length)], p = sl[k], f = FEATS[i];
     const el = document.createElement("div");
     el.className = "ev";
-    el.style.cssText = `left:${p.x + (innerWidth > 760 ? Math.round(Math.random() * 36) : 0)}px;top:${p.y}px;width:${p.w}px`;
-    el.innerHTML = `<div class="ev-in" style="--bd:${-Math.random() * 5}s"><span class="dot"></span><div><b>${EV[i].n}</b><small></small></div></div>`;
+    el.style.cssText = `left:${p.x + (innerWidth > 760 ? Math.round(Math.random() * 30) : 0)}px;top:${p.y}px;width:${p.w}px`;
+    el.innerHTML = `<div class="ev-in" style="--bd:${-Math.random() * 5}s"><span class="ic">${f.i}</span><div><b>${f.t}</b><small>${f.d}</small></div></div>`;
     box.appendChild(el);
-    active.set(i, {el, i, slot: k});
-    upd();
+    active.set(i, {el, slot: k});
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
     setTimeout(() => { el.classList.remove("on"); setTimeout(() => { el.remove(); active.delete(i); }, 600); }, 5500 + Math.random() * 3500);
   }
   spawn(); setTimeout(spawn, 700);
   setInterval(spawn, 1900);
-  setInterval(upd, 1000);
 })();
 
 /* ---------- indirme düğmesi: en son sürümün setup dosyasına bağlanır ---------- */
