@@ -123,6 +123,38 @@
     opacity:0;transform:translate(46px,-50%);transition:transform .42s cubic-bezier(.2,.8,.2,1),opacity .3s;pointer-events:none}
   .dpop.show{opacity:1;transform:translate(0,-50%)}
 
+  /* bekleme şeridi (uygulamada savaş yokken görünen ince başlık) ve geçiş animasyonları */
+  .app .ahead{display:flex;align-items:center;gap:10px;padding:8px 12px 10px}
+  .app:not(.idle) .ahead{display:none}
+  .app.idle .fightbar,.app.idle .list{display:none}
+  .app.idle{padding-bottom:0}
+  .app.idle::after{display:none}
+  .app .ahead .logo{height:30px;width:auto;margin:-5px 2px -5px -2px;opacity:.9}
+  .app .h-ico{width:30px;height:30px;flex:none;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);box-shadow:0 0 0 1px rgba(255,255,255,.07) inset}
+  .app .h-ico .cicon{width:24px;height:24px}
+  .app .title{font-weight:700;letter-spacing:.4px;line-height:1.25}
+  .app .title small{font-weight:500;color:var(--dim);font-size:10.5px;letter-spacing:.3px}
+  .app .subrow{display:flex;align-items:center;gap:7px}
+  .app .fac{display:grid;flex:none;width:17px;height:17px;border-radius:50%;place-items:center;color:#d29aa8;background:rgba(190,100,125,.13);border:1px solid rgba(190,100,125,.22)}
+  .app .fac svg,.app .icon-btn svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .app .fac svg{width:11px;height:11px;stroke-width:1.9}
+  .app .spacer{flex:1}
+  .app .icon-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:var(--text);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:13px}
+  .app .icon-btn svg{width:14px;height:14px;stroke-width:1.9}
+  .app.reveal{animation:unfold .46s cubic-bezier(.22,.8,.2,1) both}
+  .app.reveal .fightbar{animation:rise .42s .10s cubic-bezier(.22,.8,.2,1) both}
+  .app.reveal .row{animation:rise .44s calc(.16s + var(--i,0) * .05s) cubic-bezier(.22,.8,.2,1) both}
+  .app.leaving{animation:fold .42s cubic-bezier(.4,0,.2,1) both}
+  .app.leaving .fightbar,.app.leaving .row{animation:sink .28s ease-in both}
+  /* şerit yüksekliği (--ih) JS ile ölçülür; katlanma tam o yüksekliğe iner, böylece bekleme durumuna geçişte sıçrama olmaz */
+  @keyframes fold{from{clip-path:inset(0 0 0 0 round 14px)}to{clip-path:inset(0 0 calc(100% - var(--ih,52px)) 0 round 14px)}}
+  @keyframes unfold{from{clip-path:inset(0 0 calc(100% - var(--ih,52px)) 0 round 14px)}to{clip-path:inset(0 0 0 0 round 14px)}}
+  /* katlanırken şerit, içerik kaybolurken üstte belirir (akışa girmez: yerleşim kaymaz) */
+  .app.leaving .ahead{display:flex;position:absolute;left:0;right:0;top:0;animation:rise .26s .16s cubic-bezier(.22,.8,.2,1) both}
+  .app.reveal,.app.leaving{will-change:clip-path}
+  @keyframes sink{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -10px}}
+  @keyframes rise{from{opacity:0;translate:0 -10px}to{opacity:1;translate:0 0}}
+
   /* ---------- bölümler ---------- */
   section{max-width:1000px;margin:0 auto;padding:70px 20px 0}
   h2{font-size:clamp(26px,4vw,38px);letter-spacing:-.8px;text-align:center;margin-bottom:10px}
@@ -183,7 +215,15 @@
       <div class="evs" id="evs"></div>
 
       <div class="float app-wrap">
-        <div class="app">
+        <div class="app idle" id="app">
+          <div class="ahead">
+            <img class="logo" src="logo.webp" alt="">
+            <span class="h-ico" id="hAv"></span>
+            <div class="title"><span>WizEnolifa</span><div class="subrow"><small>EU • Baba</small><span class="fac"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></span></div></div>
+            <div class="spacer"></div>
+            <span class="icon-btn"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.5"/></svg></span>
+            <span class="icon-btn">⚙</span>
+          </div>
           <div class="fightbar">
             <div class="fb-boss"><span>Immortal Gartua</span><span class="fb-time"><i>Combat</i> <b id="ctime">00:03</b></span></div>
             <div class="fb-hp"><b id="hpTxt">31.000.000 / 50.000.000</b><em id="hpPct">62.0%</em></div>
@@ -283,12 +323,12 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
   });
   const dps = v => Math.round(v / 4.0).toLocaleString("tr");
   const tot = v => v >= 1e6 ? (v / 1e6).toFixed(2).replace(".", ",") + "M" : (v / 1e3).toFixed(1).replace(".", ",") + "K";
-  let secs = 3;
+  let secs = 0; const base = data.map(d => d.v);
   function render(){
     const sorted = [...data].sort((a, b) => b.v - a.v), top = sorted[0].v, sum = data.reduce((a, d) => a + d.v, 0);
     sorted.forEach((d, i) => {
       const e = d.el, col = rgb(COL[d.c]);
-      e.style.transform = `translateY(${i * (ROW + GAP)}px)`;
+      e.style.transform = `translateY(${i * (ROW + GAP)}px)`; e.style.setProperty("--i", i);
       const f = e.querySelector(".fill");
       f.style.width = (d.v / top * 100) + "%";
       f.style.background = `rgba(${col},${Math.max(.12, .62 - i * .09).toFixed(3)})`;
@@ -300,16 +340,22 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
     });
   }
   function tick(){
-    secs++; data.forEach(d => { d.v = Math.max(400000, d.v + d.v * (Math.random() - .42) * .035 + 40000); });
+    if(app.classList.contains("idle")) return;
+    secs++; data.forEach((d, i) => { d.v = Math.max(200000, d.v * (1 + (Math.random() - .45) * .04) + base[i] * .04); });
     data[0].v = Math.max(data[0].v, data[1].v * .9);
     const m = String(Math.floor(secs / 60)).padStart(2, "0"), s = String(secs % 60).padStart(2, "0");
     document.getElementById("ctime").textContent = m + ":" + s;
-    const hp = Math.max(8, 62 - (secs % 160) * .32);
+    const hp = Math.max(8, 94 - secs * 1.7);
     document.getElementById("hpFill").style.width = hp + "%";
     document.getElementById("hpPct").textContent = hp.toFixed(1) + "%";
     document.getElementById("hpTxt").textContent = Math.round(hp / 100 * 50e6).toLocaleString("tr") + " / 50.000.000";
     render();
   }
+  const app = document.getElementById("app");
+  document.getElementById("hAv").innerHTML = `<img class="cicon" alt="" src="${ICON.Gladiator}">`;
+  const later = (f, ms) => setTimeout(f, ms);
+  const measure = () => { if(app.classList.contains("idle")) app.style.setProperty("--ih", app.offsetHeight + "px"); };
+  measure(); addEventListener("resize", measure);
   render(); setInterval(tick, 1000);
 
   /* 3 kez ölen oyuncu: sayaç ve "Çok Fazla Öldü" kutusu, uygulamadaki gibi 10 sn yerine kısa bir döngüyle */
@@ -320,7 +366,22 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
     setTimeout(() => pop.classList.remove("show"), 4200);
     setTimeout(() => { chip.hidden = true; }, 6000);
   };
-  setTimeout(cycle, 2200); setInterval(cycle, 11000);
+
+  /* Bekleme şeridi -> savaş -> geri katlanıp şeride dönme (uygulamadaki geçiş animasyonlarıyla aynı) */
+  function startCombat(){
+    secs = 0; data.forEach((d, i) => { d.v = base[i] * .3; });
+    data.forEach(d => { d.el.querySelector(".dth").hidden = true; d.el.querySelector(".dpop").classList.remove("show"); });
+    app.classList.remove("idle", "leaving"); app.classList.add("reveal");
+    tick();
+    later(() => app.classList.remove("reveal"), 900);
+    later(cycle, 6500);
+    later(endCombat, 21000);
+  }
+  function endCombat(){
+    app.classList.add("leaving");
+    later(() => { app.classList.remove("leaving"); app.classList.add("idle"); later(startCombat, 4500); }, 440);
+  }
+  later(startCombat, 3500);
 
 })();
 
