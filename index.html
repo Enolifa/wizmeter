@@ -80,11 +80,6 @@
     animation:bob 6s ease-in-out infinite;animation-delay:var(--bd,0s);transition:border-color .3s,box-shadow .3s}
   .ev .ic{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(255,138,61,.14);color:var(--ember)}
   .ev .ic svg{width:17px;height:17px}
-  .ev .ic.im{width:52px;height:38px;border-radius:8px;overflow:hidden;background:#0b0b0f;border:1px solid rgba(255,255,255,.12)}
-  .ev .ic.im img{width:100%;height:100%;object-fit:cover;object-position:left top;display:block}
-  .ev .mock{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;text-align:center;background:radial-gradient(circle at 50% 120%,#2a1a14,#0b0b0f);font-size:5.5px;font-weight:800;color:#ff4d42;text-shadow:0 0 3px #000}
-  .ev .mock em{font-style:normal;font-size:4px;letter-spacing:1px;color:#ff8a80}
-  .ev .mock s{text-decoration:none;color:#ffd9d4;margin-left:2px}
   .ev b{display:block;font-weight:600;white-space:nowrap;font-size:13px}
   .ev small{color:var(--dim);display:block;font-size:11px;line-height:1.3;margin-top:1px}
   .ev.soon .ev-in{border-color:rgba(255,138,61,.55);box-shadow:0 0 22px rgba(255,138,61,.25),0 12px 34px rgba(0,0,0,.5)}
@@ -395,21 +390,20 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
 (() => {
   const ico = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + p + "</svg>";
   const FEATS = [
-    {t: "Karakteri kaydet", d: "Ekipman, beceri ve Daevanion görsel olarak masaüstüne", i: ico('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5M9.5 12.8L12 15.3l2.5-2.5"/>')},
-    {t: "Farm Sistemi", d: "Süre, kinah, Abyss puanı, eşyalar", img: "img/farm.jpg", i: ico('<circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>')},
-    {t: "Ölüm Özeti", d: "Kim öldürdü: gücü, ekipmanı, becerileri", img: "img/death.jpg", i: ico('<circle cx="12" cy="11" r="7"/><path d="M9 20v-3M15 20v-3M9.5 11h.01M14.5 11h.01"/>')},
-    {t: "Düşman uyarısı", d: "Yazı ve ses; 1-2 kişide savaş gücü", mock: true, i: ico('<path d="M12 3l9 16H3z"/><path d="M12 10v4.5M12 17.2v.1"/>')},
-    {t: "Uzun boss savaşı", d: "Boss mekanik yaparken panel açık kalır", i: ico('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/>')},
-    {t: "Parça ayrıntısı", d: "Üzerine gel: özellikler, taşlar, teotaş", img: "img/item-tip.jpg", i: ico('<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M12 8v8M9.5 11h5"/>')},
-    {t: "Daevanion tahtaları", d: "Tahtanın tamamı tek bakışta", i: ico('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>')},
-    {t: "Beceriler ve seviyeleri", d: "Aktif, pasif ve özel; simgeleriyle", i: ico('<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>')},
-    {t: "Savaş geçmişi", d: "Biten her savaş kayıtta, oyuncuya tıkla", i: ico('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 8v5l3 2"/>')},
-    {t: "Oyuncu ayrıntısı", d: "Beceri dökümü, kritik, vuruş dağılımı", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
-    {t: "Çok Fazla Öldü", d: "3 kez ölenin yanında uyarı çıkar", i: ico('<circle cx="12" cy="11" r="7"/><path d="M9 20v-3M15 20v-3M9.5 11h.01M14.5 11h.01"/>')},
-    {t: "Kendini günceller", d: "Bar dolar, sihirbazsız kurulur", i: ico('<path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/>')},
-    {t: "Zamanlayıcılar", d: "Boss ve etkinlikler için ön uyarı", i: ico('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/>')},
-    {t: "Sınıf renkli barlar", d: "Yüksekten alçağa solan sıralama", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
-    {t: "Oyunla birlikte açılır", d: "AION 2 açılınca belirir, kapanınca gizlenir", i: ico('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>')},
+    {t: "Karakter yedeği", d: "Ekipman, beceri ve Daevanion sayfaları masaüstüne resim olur", i: ico('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5M9.5 12.8L12 15.3l2.5-2.5"/>')},
+    {t: "Farm Sistemi", d: "Abyss'te saatte ne kazandığını ve ne düştüğünü gösterir", i: ico('<circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>')},
+    {t: "Ölüm Özeti", d: "Öldün mü? Seni kimin, neyle vurduğunu gösterir", i: ico('<circle cx="12" cy="11" r="7"/><path d="M9 20v-3M15 20v-3M9.5 11h.01M14.5 11h.01"/>')},
+    {t: "Düşman uyarısı", d: "Karşı ırktan biri yaklaşınca ekranda yazıyla ve sesle haber verir", i: ico('<path d="M12 3l9 16H3z"/><path d="M12 10v4.5M12 17.2v.1"/>')},
+    {t: "Eşya detayı", d: "Üzerine gel: ek özellikler, büyü taşları, teotaş ortaya çıksın", i: ico('<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M12 8v8M9.5 11h5"/>')},
+    {t: "Daevanion tahtası", d: "Üstüne gel, tahtanın tüm düğümleri ve açık etkileri görünsün", i: ico('<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>')},
+    {t: "Beceri listesi", d: "Karakterin bütün becerileri, seviyesi ve simgesiyle", i: ico('<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>')},
+    {t: "Savaş geçmişi", d: "Biten her savaşı tekrar aç, oyuncuya tıklayıp ayrıntısına bak", i: ico('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 8v5l3 2"/>')},
+    {t: "Oyuncu dökümü", d: "Hangi beceriyle ne kadar vurdu, kaç kritik, vuruşlar nasıl dağıldı", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
+    {t: "Çok Fazla Öldü", d: "Biri 3 kez ölünce yanında küçük bir uyarı belirir", i: ico('<circle cx="12" cy="11" r="7"/><path d="M9 20v-3M15 20v-3M9.5 11h.01M14.5 11h.01"/>')},
+    {t: "Kendini günceller", d: "Yeni sürüm arka planda iner, kurulum sihirbazı çıkmaz", i: ico('<path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/>')},
+    {t: "Boss ve etkinlik zamanı", d: "Boss çıkmadan, etkinlik başlamadan önce ekranda uyarır", i: ico('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 3h6"/>')},
+    {t: "Sınıf renkli barlar", d: "Herkes sınıfının renginde, en çok vurandan aza doğru dizilir", i: ico('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
+    {t: "Oyunla birlikte açılır", d: "AION 2'yi açınca kendiliğinden gelir, kapatınca kaybolur", i: ico('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>')},
   ];
   const box = document.getElementById("evs");
   const active = new Map(); // özellik no -> {el, slot}
@@ -430,7 +424,7 @@ document.querySelectorAll(".rv").forEach(el => io.observe(el));
     const el = document.createElement("div");
     el.className = "ev";
     el.style.cssText = `left:${p.x + (innerWidth > 760 ? Math.round(Math.random() * 30) : 0)}px;top:${p.y}px;width:${p.w}px`;
-    el.innerHTML = `<div class="ev-in" style="--bd:${-Math.random() * 5}s"><span class="ic${f.img || f.mock ? " im" : ""}">${f.img ? '<img src="' + f.img + '" alt="" loading="lazy">' : f.mock ? '<div class="mock"><em>2 DÜŞMAN OYUNCU</em>Wiz<s>173K</s><br>Enolifa<s>98K</s></div>' : f.i}</span><div><b>${f.t}</b><small>${f.d}</small></div></div>`;
+    el.innerHTML = `<div class="ev-in" style="--bd:${-Math.random() * 5}s"><span class="ic">${f.i}</span><div><b>${f.t}</b><small>${f.d}</small></div></div>`;
     box.appendChild(el);
     active.set(i, {el, slot: k});
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("on")));
